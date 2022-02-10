@@ -9,33 +9,29 @@ public class main {
 
 	public static void main(String[] args) throws IOException {
 		Scanner reader = new Scanner(System.in);
-		File file = new File("C:\\Users\\gabri\\Downloads\\dirigido2.net");
-		
 		Grafo_D_NP grafo = new Grafo_D_NP();
 		
+		File file = new File("C:\\Users\\gabri\\Downloads\\manha.net");
 		grafo.ler(file);
-		
-		
-		while(true) {
-			System.out.println("----------Menu----------");
-			System.out.println("1 - Forte Conexo");
-			System.out.println("2 - Ordenacao Topologica");
-			int menu = reader.nextInt();
-			if (menu == 1) {
-				int [] fort = new int[grafo.qtdVertices()]; 
-				fort = grafo.Forte_Conexo(grafo);
-				break;
-			}
-			if (menu == 2) {
-				//Ordenacao
-				List<Integer> ord = new ArrayList<Integer>();
-				ord = grafo.OrdenaTopo(grafo);
-				for (int i = 0; i < grafo.qtdVertices()-1; i++) {
-					System.out.print(grafo.rotulo(ord.get(i))+" -> ");
-				}
-				System.out.print(grafo.rotulo(ord.get(ord.size()-1)));
-				break;
-			}
+		System.out.println("============================================================");
+		System.out.println("Exercício 1 | grafo: dirigido2.net");
+		File dirigidoFile = new File("./grafos/dirigido2.net");
+		grafo.ler(dirigidoFile);
+		int [] fort = new int[grafo.qtdVertices()]; 
+		fort = grafo.Forte_Conexo(grafo);
+		System.out.println("");
+		System.out.println("============================================================");
+		System.out.println("Exercício 2 | grafo: manha.net");
+		File manhaFile = new File("./grafos/manha.net");
+		List<Integer> ord = new ArrayList<Integer>();
+		ord = grafo.OrdenaTopo(grafo);
+		for (int i = 0; i < grafo.qtdVertices()-1; i++) {
+			System.out.print(grafo.rotulo(ord.get(i))+" -> ");
 		}
+		System.out.print(grafo.rotulo(ord.get(ord.size()-1)));
+		System.out.println("");
+		System.out.println("============================================================");
+
+		
 	}
 }
