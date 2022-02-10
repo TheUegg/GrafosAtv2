@@ -5,8 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -143,6 +146,7 @@ public class Grafo_D_NP {
 			return E.length;
 		}
 		
+		
 		// Verifica nas arestas quais ligações o vertice possue, e retorna o seus vizinhos
 		protected List<Integer> vizinhos(int v) {
 			// Lista para armazenar os vizinhos
@@ -163,8 +167,7 @@ public class Grafo_D_NP {
 		    // Retorna lista de vizinhos
 			return viz;
 		}
-		
-		
+
 		protected int[] Forte_Conexo(Grafo_D_NP grafo) {
 			
 			//Criando CTFA, onde armazeno Cv,Tv,Fv,Av
@@ -187,10 +190,60 @@ public class Grafo_D_NP {
 			
 			//Chamo o DFS adaptado para que o loop funcione a partir do tempo decorrido no Fv
 			CTFAt = DFS_adap(grafoT,CTFA);
+
 			//loop que armazena o Avt
 			for (int i = 0; i < grafo.qtdVertices(); i++) {		
 				Avt[i] = CTFAt[i][3];
 			}
+			
+			//Lista utilizada para armazenar os elementos fortemente conexos
+			List<Integer> final2 = new ArrayList<Integer>();
+			
+			//Loop para colocar aos pares ligados dos elementos fortemente conexos
+			for (int i = 0; i < grafo.qtdVertices(); i++) {		
+				if(Avt[i] != 0) {
+					final2.add(i+1);
+					final2.add(Avt[i]);
+				}
+			}
+			
+			//Método usado para remover os elementos repetidos da lista
+			final2 = removeDuplicatas((ArrayList<Integer>) final2);
+			
+			//Lista utilizada para print
+			int[][] final3 = new int[grafo.qtdVertices()][2];	
+			
+			//Caso tenha algum elemento fortemente conexo
+			if(final2.size() > 0) {
+				//Adiciono final2 e Avt para a lista de print, no qual consigo fazer a separacao dos conjuntos
+				for (int i = 0; i < grafo.qtdVertices(); i++) {
+					final3[i][0] = final2.get(i);
+					final3[i][1] = Avt[i];
+				}
+				//for e ifs para organizar o print
+				for (int i = 0; i < final3.length-1; i++) {
+					if(final3[i][1] != 0 && final3[i+1][1] != 0) {
+						System.out.print(final3[i][0]+",");
+					}
+					if(final3[i][1] != 0 && final3[i+1][1] == 0) {
+						System.out.print(final3[i][0]);
+					}
+					if(final3[i][1] == 0 && i != 0) {
+						System.out.print("] ["+final3[i][0]+",");	
+					}
+					if(i == 0) {
+						System.out.print("[");					
+					}
+				}
+				System.out.print(final3[final3.length-1][0]+"]");
+			//Quando não possui nenhum elemento fortemente conexo com ligacao a outro
+			}else {
+				//Print todos os elementos separadamente
+				for (int i = 0; i < grafo.qtdVertices(); i++) {
+					System.out.print("["+(i+1)+"]");
+				}
+			}
+
 			//retorno a lista Avt
 			return Avt;
 		}
@@ -214,20 +267,12 @@ public class Grafo_D_NP {
 			//Array criado para auxiliar no loop de Fv
 			int[] index = new int[grafo.qtdVertices()];
 			
-			/*for (int i = 0; i < grafo.qtdVertices(); i++) {
-				System.out.println("++"+CTFA[i][2]+"++");
-			}*/
-			
 			//Variaveis auxiliares em relacao ao array index
 			int count = 0;
 			int largest = 0;
 			//Loop para ordenar os indexes do maior para o menor(esse é o conteudo contido no array index)
 			for (int j = 0; j < grafo.qtdVertices(); j++) {
 				for ( int i = 0; i < grafo.qtdVertices(); i++ ) {
-					//System.out.println("L: "+largest);
-					//System.out.println(CTFA[i][2]);
-					//System.out.println(CTFA[0][2]);
-					//-----
 					//Comparação para armazenar o maior valor no array
 					if ( CTFA[i][2] > CTFA[largest][2]) {
 						largest = i;
@@ -242,15 +287,11 @@ public class Grafo_D_NP {
 			
 			//loop adaptado funcionando a partir de Fv
 			for (int i : index) {
-				//System.out.println("index: "+i);
-				//System.out.println("Cv antes do Visist: "+Cv[i]);
-				//-------
 				//Testa para ver se o elemento analizado foi visitado anteriormente
 				if (Cv[i] == 0){
 					//Chama o metodo DFS_Visit, no qual fara as atribuicoes
 					DFS_Visit(grafo,i,Cv,Tv,Fv,Av, tempo);
 				}
-				//System.out.println("Cv Depois do Visist: "+Cv[i]);
 			}
 			
 			//Criacao de CTFAt, para armazenar todos os dados e os retorna-los posteriormente
@@ -296,15 +337,11 @@ public class Grafo_D_NP {
 			
 			//loop para fazer as atribuicoes iniciais
 			for (int i = 0; i < grafo.qtdVertices(); i++) {
-				//System.out.println("i: "+i);
-				//System.out.println("Cv antes do Visist: "+Cv[i]);
-				//----------
 				//Testa se o elemento observado foi visitado anteriormente
 				if (Cv[i] == 0){
 					//Chama o metodo DFS_Visit, onde fara as atribuicoes
 					tempo = DFS_Visit(grafo,i,Cv,Tv,Fv,Av, tempo);
 				}
-				//System.out.println("Cv depois do Visist: "+Cv[i]);
 			}
 			
 			//Cria CTFA, para armazenar os dados obtidos referente ao metodo anterior
@@ -321,29 +358,16 @@ public class Grafo_D_NP {
 		}
 		
 		protected int DFS_Visit(Grafo_D_NP grafo,int v,int [] Cv,int[] Tv,int[] Fv,int[] Av, int tempo) {
-			//--------
-			//System.out.println("V antes de CV: "+v);
-			//--------
 			//Atribui o elemento a marcacao de visitado
 			Cv[v] = 1;
 			//Aumenta o tempo
 			tempo++;
 			//Insere o tempo atual em Tv(Tempo de inicio)
 			Tv[v] = tempo;
-			//-------
-			//System.out.println("VIzi: "+grafo.vizinhos(v+1));
-			//-------
 			//loop que observa os visinhos do elemento vizitado
 			for (int u : grafo.vizinhos(v+1)) {
-				//------------
-				//System.out.println("CV: "+Cv[u-1]);
-				//------------
 				//Testa se o elemento observado foi visitado anteriormente
 				if (Cv[u-1] == 0) {
-					//----------
-					//System.out.println("u-1 = "+(u-1));
-					//System.out.println("v = "+(v+1));
-					//----------
 					//Insere o valor V para o Antecessor
 					Av[u-1] = v+1;
 					//Utiliza recursao para continuar a busca no grafo
@@ -417,4 +441,19 @@ public class Grafo_D_NP {
 		protected String rotulo(int index) {
 			return V[index];
 		}
+		
+		public static <Integer> ArrayList<Integer> removeDuplicatas(ArrayList<Integer> list) {
+	  
+	        //Cria lista Hash
+	        Set<Integer> set = new LinkedHashSet<>();
+	        //Adiciona os elementos
+	        set.addAll(list);
+	        //Limpa a lista
+	        list.clear();
+	        //Adiciona sem dupliucatas
+	        list.addAll(set);
+	        //Returna a lista
+	        return list;
+	    }
+		
 }
